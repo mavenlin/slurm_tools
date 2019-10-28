@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export SLURM_PORT=9999
+connect 9999 beluga.calculcanada.ca

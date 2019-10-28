@@ -1,0 +1,11 @@
+#!/bin/bash
+
+exists=$(pgrep -f "\-L $1:localhost:22 $2")
+if [ -z $exists ]
+then
+    echo "Launching a background ssh session to $2"
+    nohup bash -c "ssh -n -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -tt -L $1:localhost:22 $2" &> /dev/null &
+else
+    echo "Existing connection to $2"
+    echo "Process id $exists"
+fi

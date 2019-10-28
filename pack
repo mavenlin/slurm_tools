@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+from git import Repo
+from git.cmd import Git
+from datetime import datetime
+import click
+import uuid
+import tarfile
+
+
+def sbatch_script(options, commands, sbatch_script_name, verbose=True):
+  options.update({
+      "--output": "slurm.out",
+      "--error": "slurm.err",
+  })
+  def print_if_verbose(*args, **kwargs):
+    if verbose:
+      logging.info(*args, **kwargs)
+  with open(sbatch_script_name, "w") as f:
+    f.write("#!/bin/bash\n")
+    for k, v in options.items():
+      f.write(f"#SBATCH {k} {v}\n")
+    for command in commands:
+      f.write(f"{command}\n")
+  with open(sbatch_script_name, "r") as f:
+    print_if_verbose(f.read())
+
+
+@click.command(context_settings=dict(
+    ignore_unknown_options=True,
+))
+@click.option('--job-name', '-J', type=str, required=True, help="name of experiment")
+@click.argument('command', nargs=-1, type=click.UNPROCESSED)
+def pack(job_name, command):
+  # check if the repo is clean
+  repo = Repo("./", search_parent_directories=True)
+  git_cmd = Git("./")
+  diff = repo.index.diff(None)
+  timestamp = datetime.now().strftime('%Y%m%d.%H%M%S')
+  exec_path = git_cmd.rev_parse(show_prefix=True)
+  if len(diff) > 0:
+    repo.git.add('-u')
+    repo.index.commit(f"[dirty] commit {timestamp}")
+    tar_name = f"{job_name}-{timestamp}"
+    prefix = f"{job_name}/{timestamp}"
+    with open(f"/tmp/{tar_name}.tar", "wb") as f:
+      repo.archive(f, format="tar", prefix=f"{prefix}/")
+    repo.head.reset("HEAD~1")
+  else:
+    sha = git_cmd.rev_parse("HEAD", short=True)
+    tar_name = f"{job_name}-{timestamp}"
+    prefix = f"{job_name}/{timestamp}"
+    with open(f"/tmp/{tar_name}.tar", "wb") as f:
+      repo.archive(f, format="tar", prefix=f"{prefix}/")
+
+  archive = tarfile.open(f"/tmp/{tar_name}.tar", "a")
+  sbatch_script_name = f"/tmp/{uuid.uuid4().hex}"
+  options = {
+    "--gres": "gpu:1",
+    "--mem": "16G",
+    "-c": "4",
+    "--account": "rpp-bengioy",
+    "--time": "10:00:00",
+    "--job-name": f"{job_name}",
+  }
+  commands = ["source ~/tf2/bin/activate", " ".join(command)]
+  sbatch_script(options, commands, sbatch_script_name, verbose=True)
+  archive.add(sbatch_script_name, arcname=f"{prefix}/{exec_path}/sbatch_script.sh")
+  archive.close()
+
+  print(f"{tar_name}.tar\t{prefix}/{exec_path}")
+
+
+if __name__ == "__main__":
+  pack()

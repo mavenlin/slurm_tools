@@ -1,0 +1,11 @@
+#!/bin/bash
+function ssh_nocheck {
+    ssh -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' "$@"
+}
+
+if [ -t 1 ]
+then
+    ssh_nocheck -p$SLURM_PORT localhost "sacct --starttime 2019-10-25 -u linmin --format=Jobid,Jobname%-50 --allocations -n" | grep --color $1
+else
+    ssh_nocheck -p$SLURM_PORT localhost "sacct --starttime 2019-10-25 -u linmin --format=Jobid,Jobname%-50 --allocations -n" | grep $1 | cut -d ' ' -f1
+fi

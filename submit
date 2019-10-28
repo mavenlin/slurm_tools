@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ -z $SLURM_PORT ]
+then
+    echo "Make a connection first"
+    exit 1
+fi
+
+function ssh_nocheck {
+    ssh -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' "$@"
+}
+
+pack_result=($(pack $@))
+if [ $? -eq 0 ]; then
+    echo "pack tarball success"
+else
+    echo "pack tarball failed"
+    exit 1
+fi
+tarball=${pack_result[0]}
+workdir=${pack_result[1]}
+echo "tarball stored at $tarball"
+
+echo "Uploading $tarball to server"
+scp -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -P$SLURM_PORT /tmp/$tarball localhost:/home/linmin/project/run/tar/
+if [ $? -eq 0 ]; then
+    echo "Upload success"
+else
+    echo "Upload failed"
+    exit 1
+fi
+
+ssh_nocheck -p$SLURM_PORT localhost "tar xf /home/linmin/project/run/tar/$tarball -C /home/linmin/project/run/untar && cd /home/linmin/project/run/untar/$workdir && sbatch ./sbatch_script.sh"
