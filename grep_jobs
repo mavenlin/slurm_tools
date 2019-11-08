@@ -1,11 +1,14 @@
-#!/bin/bash
-function ssh_nocheck {
-    ssh -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' "$@"
-}
+#!/usr/bin/env bash
 
-if [ -t 1 ]
+
+source $(dirname "$0")/argparse "$@" || exit 1
+source $(dirname "$0")/utils.sh || exit 1
+SLURM_PORT=$(find_port "$CLUSTER")
+$(dirname $0)/connect "$CLUSTER"
+
+if [ -t 1 ] # if executed without pipe
 then
-    ssh_nocheck -p$SLURM_PORT localhost "sacct --starttime 2019-10-25 -u linmin --format=Jobid,Jobname%-50 --allocations -n" | grep --color $1
+    ssh_nocheck -p"$SLURM_PORT" "$USER"@localhost "sacct --starttime 2019-10-25 -u $USER --format=Jobid,Jobname%-50 --allocations -n" | grep --color "${_arg_leftovers[@]}"
 else
-    ssh_nocheck -p$SLURM_PORT localhost "sacct --starttime 2019-10-25 -u linmin --format=Jobid,Jobname%-50 --allocations -n" | grep $1 | cut -d ' ' -f1
+    ssh_nocheck -p"$SLURM_PORT" "$USER"@localhost "sacct --starttime 2019-10-25 -u $USER --format=Jobid,Jobname%-50 --allocations -n" | grep "${_arg_leftovers[@]}" | cut -d ' ' -f1
 fi

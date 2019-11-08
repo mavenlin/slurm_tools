@@ -1,7 +1,10 @@
 #!/bin/bash
 
-function ssh_nocheck {
-    ssh -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' "$@"
-}
-dir="/home/linmin/project/run/tensorboard/"
-ssh_nocheck -p$SLURM_PORT localhost "rm -r $dir/*"
+source $(dirname $0)/argparse "$@" || exit 1
+source $(dirname "$0")/utils.sh || exit 1
+
+SLURM_PORT=$(find_port "$CLUSTER")
+$(dirname $0)/connect "$CLUSTER"
+
+dir="/home/$USER/project/run/tensorboard/"
+ssh_nocheck -p"$SLURM_PORT" "$USER"@localhost "rm -r $dir/*"

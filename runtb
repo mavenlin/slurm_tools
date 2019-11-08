@@ -1,14 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-if [ -z $SLURM_PORT ]
-then
-    echo "Make a connection first"
-    exit 1
-fi
-
-function ssh_nocheck {
-    ssh -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' "$@"
-}
+source $(dirname $0)/argparse "$@" || exit 1
+source $(dirname $0)/utils.sh || exit 1
+SLURM_PORT=$(find_port "$CLUSTER")
+$(dirname $0)/connect "$CLUSTER"
 
 # Collect logs from the job ids that are passed in from the stdin
 function join_by { local IFS="$1"; shift; echo "$*"; }
@@ -17,30 +12,28 @@ while read line
 do
     jobids+=($line)
 done
-
 if [ ${#jobids[@]} -eq 0 ]
 then
-    echo "Error, collect_logs collected none"
+    echo "[Error] there's no job id piped to runtb"
     exit 1
 fi
-
 jobids=$(join_by , "${jobids[@]}")
 folder=$(date '+%Y%m%d_%H%M%S')
-dir="/home/linmin/project/run/tensorboard/$folder"
+dir="/home/$USER/project/run/tensorboard/$folder"
 ssh_nocheck -p$SLURM_PORT localhost "mkdir -p $dir && sacct -j $jobids --format=Jobid,Jobname%-50,Workdir%-200 --allocations -n | tr -s \" \" | xargs -n 1 | parallel -N 3 ln -sf {3} $dir/{1}_{2}"
 
 # Launch tensorboard on the symlinked folder
 function kill_sleep {
-    ssh_nocheck -p$SLURM_PORT localhost 'scancel $(squeue -u linmin -n sleep --Format=jobid -h)'
+    ssh_nocheck -p$SLURM_PORT $USER@localhost "scancel $(squeue -u "$USER" -n sleep --Format=jobid -h)"
 }
 trap "kill_sleep; exit 1" INT
 
 DIR=$dir
-RUNNING_NODE=$(ssh_nocheck -p$SLURM_PORT localhost "squeue -u linmin --Format=NODELIST,STATE" | grep RUNNING | cut -d " " -f1)
+RUNNING_NODE=$(ssh_nocheck -p$SLURM_PORT $USER@localhost "squeue -u $USER --Format=NODELIST,STATE" | grep RUNNING | cut -d " " -f1)
 if [ -z "$RUNNING_NODE" ]
 then
     echo "Allocating Resource"
-    ssh_nocheck -n -t -t -p$SLURM_PORT localhost "salloc --account=def-bengioy -c 4 --mem 16G sleep 1h" &
+    ssh_nocheck -n -t -t -p$SLURM_PORT $USER@localhost "salloc --account=def-bengioy -c 4 --mem 16G sleep 1h" &
     salloc_pid=$!
 else
     echo "Reusing Resource"
@@ -48,17 +41,17 @@ fi
 
 while [ -z "$RUNNING_NODE" ]
 do
-    sleep 2
-    RUNNING_NODE=$(ssh_nocheck -p$SLURM_PORT localhost "squeue -u linmin --Format=NODELIST,STATE" | grep RUNNING | cut -d " " -f1)
+    sleep 5
+    RUNNING_NODE=$(ssh_nocheck -p$SLURM_PORT $USER@localhost "squeue -u $USER --Format=NODELIST,STATE" | grep RUNNING | cut -d " " -f1)
 done
 function kill_tensorboard {
-    ssh_nocheck -J localhost:$SLURM_PORT $RUNNING_NODE "pkill tensorboard"
+    ssh_nocheck -J $USER@localhost:$SLURM_PORT $USER@$RUNNING_NODE "pkill tensorboard"
 }
 trap "kill_sleep; kill_tensorboard; exit 1" INT
 
-PORT=$(ssh_nocheck -J localhost:$SLURM_PORT $RUNNING_NODE "python -c 'import socket; s=socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.bind((\"localhost\",0)); print(s.getsockname()[1])'")
-echo "Opening tensorboard on $RUNNING_NODE:$PORT"
-ssh_nocheck -t -t -J localhost:$SLURM_PORT -L $PORT:localhost:$PORT $RUNNING_NODE "source ~/tf2/bin/activate && tensorboard --logdir $DIR --bind_all --port $PORT" &
+PORT=$(ssh_nocheck -J $USER@localhost:$SLURM_PORT $USER@$RUNNING_NODE "python -c 'import socket; s=socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.bind((\"localhost\",0)); print(s.getsockname()[1])'")
+echo "Opening tensorboard on $USER@$RUNNING_NODE:$PORT"
+ssh_nocheck -t -t -J $USER@localhost:$SLURM_PORT -L $PORT:localhost:$PORT $USER@$RUNNING_NODE "source ~/tf2/bin/activate && tensorboard --logdir $DIR --bind_all --port $PORT" &
 tb_pid=$!
 
 echo "http://localhost:$PORT"

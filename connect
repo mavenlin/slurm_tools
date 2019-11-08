@@ -1,11 +1,23 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-exists=$(pgrep -f "\-L $1:localhost:22 $2")
-if [ -z $exists ]
+source $(dirname $0)/argparse "$@" || exit 1
+source $(dirname $0)/utils.sh || exit 1
+
+INFO=$(find_all "$CLUSTER")
+LOCALPORT=$(awk '{ print $1 }' <<<"$INFO")
+HOSTNAME=$(awk '{ print $2 }' <<<"$INFO")
+REMOTEPORT=$(awk '{ print $3 }' <<<"$INFO")
+
+if [ -z "$(pgrep -f "\-L $LOCALPORT:localhost:$REMOTEPORT")" ]
 then
-    echo "Launching a background ssh session to $2"
-    nohup bash -c "ssh -n -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -tt -L $1:localhost:22 $2" &> /dev/null &
+    echo "Launching a background ssh session to $HOSTNAME" >> /dev/stderr
+    nohup bash -c "ssh -n -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -tt -L $LOCALPORT:localhost:$REMOTEPORT $USER@$HOSTNAME" &> /dev/null &
+    echo "Waiting connection to $USER_PREFIX$HOSTNAME" >> /dev/stderr
+    while [ -z "$(lsof -i -P -n | grep "$LOCALPORT")" ]
+    do
+	sleep 1
+    done
+    echo "connection established" >> /dev/stderr
 else
-    echo "Existing connection to $2"
-    echo "Process id $exists"
+    echo "$CLUSTER through localhost:$LOCALPORT" >> /dev/stderr
 fi

@@ -4,9 +4,34 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 from git import Repo
 from git.cmd import Git
 from datetime import datetime
-import click
 import uuid
 import tarfile
+import argparse
+import sys
+
+
+def parse_sbatch_args(args):
+  sbatch_args = {}
+  while len(args) > 0:
+    arg = args[0]
+    if arg.startswith('--') and '=' in arg:
+      arg = args.pop(0)
+      key, value = arg.split('=')
+      sbatch_args[key] = value
+    elif arg.startswith('--') and '=' not in arg:
+      key = args.pop(0)
+      value = args.pop(0)
+      sbatch_args[key] = value
+    elif arg.startswith('-'):
+      key = args.pop(0)
+      if not args[0].startswith('-'):
+          value = args.pop(0)
+      else:
+          value = ''
+      sbatch_args[key] = value
+    else:
+      break
+  return sbatch_args, args
 
 
 def sbatch_script(options, commands, sbatch_script_name, verbose=True):
@@ -27,12 +52,7 @@ def sbatch_script(options, commands, sbatch_script_name, verbose=True):
     print_if_verbose(f.read())
 
 
-@click.command(context_settings=dict(
-    ignore_unknown_options=True,
-))
-@click.option('--job-name', '-J', type=str, required=True, help="name of experiment")
-@click.argument('command', nargs=-1, type=click.UNPROCESSED)
-def pack(job_name, command):
+def pack(job_name, command, sbatch_args):
   # check if the repo is clean
   repo = Repo("./", search_parent_directories=True)
   git_cmd = Git("./")
@@ -64,6 +84,7 @@ def pack(job_name, command):
     "--time": "10:00:00",
     "--job-name": f"{job_name}",
   }
+  options.update(sbatch_args)
   commands = ["source ~/tf2/bin/activate", " ".join(command)]
   sbatch_script(options, commands, sbatch_script_name, verbose=True)
   archive.add(sbatch_script_name, arcname=f"{prefix}/{exec_path}/sbatch_script.sh")
@@ -73,4 +94,10 @@ def pack(job_name, command):
 
 
 if __name__ == "__main__":
-  pack()
+  sbatch_args, command = parse_sbatch_args(sys.argv[1:])
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--job-name", '-J', type=str, required=True,
+                      help="name of job")
+  args, _ = parser.parse_known_args(sys.argv[1:])
+  job_name = args.job_name
+  pack(job_name, command, sbatch_args)

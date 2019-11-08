@@ -1,16 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-if [ -z $SLURM_PORT ]
-then
-    echo "Make a connection first"
-    exit 1
-fi
+source $(dirname $0)/argparse "$@" || exit 1
+source $(dirname "$0")/utils.sh || exit 1
 
-function ssh_nocheck {
-    ssh -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' "$@"
-}
+SLURM_PORT=$(find_port "$CLUSTER")
+$(dirname $0)/connect "$CLUSTER"
 
-pack_result=($(pack $@))
+pack_result=($(pack "${@:2}"))
 if [ $? -eq 0 ]; then
     echo "pack tarball success"
 else
@@ -22,7 +18,7 @@ workdir=${pack_result[1]}
 echo "tarball stored at $tarball"
 
 echo "Uploading $tarball to server"
-scp -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -P$SLURM_PORT /tmp/$tarball localhost:/home/linmin/project/run/tar/
+scp -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -P$SLURM_PORT /tmp/$tarball $USER@localhost:/home/$USER/project/run/tar/
 if [ $? -eq 0 ]; then
     echo "Upload success"
 else
@@ -30,4 +26,4 @@ else
     exit 1
 fi
 
-ssh_nocheck -p$SLURM_PORT localhost "tar xf /home/linmin/project/run/tar/$tarball -C /home/linmin/project/run/untar && cd /home/linmin/project/run/untar/$workdir && sbatch ./sbatch_script.sh"
+ssh_nocheck -p$SLURM_PORT $USER@localhost "tar xf /home/$USER/project/run/tar/$tarball -C /home/$USER/project/run/untar && cd /home/$USER/project/run/untar/$workdir && sbatch ./sbatch_script.sh"
