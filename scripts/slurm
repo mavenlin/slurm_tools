@@ -39,7 +39,7 @@ _arg_leftovers=()
 
 print_help()
 {
-	printf '%s\n' "grouping submit / grep commands"
+	printf '%s\n' "grouping submit / grep / error / output / cat commands"
 	printf 'Usage: %s [-h|--help] <command> ... \n' "$0"
 	printf '\t%s\n' "<command>: command to run"
 	printf '\t%s\n' "... : command arguments"
@@ -115,6 +115,15 @@ then
 elif [ $_arg_command = "grep" ]
 then
     $(dirname $0)/slurm_grep ${_arg_leftovers[@]}
+elif [ $_arg_command = "error" ]
+then
+    $(dirname $0)/slurm_cat ${_arg_leftovers[@]} slurm.err
+elif [ $_arg_command = "output" ]
+then
+    $(dirname $0)/slurm_cat ${_arg_leftovers[@]} slurm.out
+elif [ $_arg_command = "cat" ]
+then
+    $(dirname $0)/slurm_cat ${_arg_leftovers[@]}
 else
     echo "$_arg_command is not a valid command"
     exit 1

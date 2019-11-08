@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+source $(dirname $0)/argparse "$@" || exit 1
+source $(dirname $0)/slurm_utils.sh || exit 1
+SLURM_PORT=$(find_port "$CLUSTER")
+$(dirname $0)/slurm_connect "$CLUSTER"
+
+function join_by { local IFS="$1"; shift; echo "$*"; }
+jobids=()
+while read line
+do
+    jobids+=($line)
+done
+if [ ${#jobids[@]} -eq 0 ]
+then
+    echo "[Error] there's no job id piped to runtb"
+    exit 1
+fi
+jobids=$(join_by , "${jobids[@]}")
+$(dirname $0)/remote_run $CLUSTER <<EOF
+sacct -j $jobids --format=Jobid,Jobname%-50,Workdir%-200 --allocations -n | tr -s \" \" | xargs -n 1 | parallel -N 3 cat {3}/${_arg_leftovers}
+EOF
