@@ -19,12 +19,13 @@ then
 fi
 jobids=$(join_by , "${jobids[@]}")
 folder=$(date '+%Y%m%d_%H%M%S')
-dir="/home/$USER/project/run/tensorboard/$folder"
-ssh_nocheck -p$SLURM_PORT localhost "mkdir -p $dir && sacct -j $jobids --format=Jobid,Jobname%-50,Workdir%-200 --allocations -n | tr -s \" \" | xargs -n 1 | parallel -N 3 ln -sf {3} $dir/{1}_{2}"
+dir="~/project/run/tensorboard/$folder"
+ssh_nocheck -p$SLURM_PORT $USER@localhost "mkdir -p $dir && sacct -j $jobids --format=Jobid,Jobname%-50,Workdir%-200 --allocations -n | tr -s \" \" | xargs -n 1 | parallel -N 3 ln -sf {3} $dir/{1}_{2}"
 
+TMPJOBNAME="$(date +"%Y%m%d%H%M%S")"
 # Launch tensorboard on the symlinked folder
 function kill_sleep {
-    ssh_nocheck -p$SLURM_PORT $USER@localhost "scancel $(squeue -u "$USER" -n sleep --Format=jobid -h)"
+    ssh_nocheck -p$SLURM_PORT $USER@localhost "scancel -u $USER -n $TMPJOBNAME"
 }
 trap "kill_sleep; exit 1" INT
 

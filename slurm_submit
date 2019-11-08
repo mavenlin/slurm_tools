@@ -6,7 +6,7 @@ source $(dirname "$0")/utils.sh || exit 1
 SLURM_PORT=$(find_port "$CLUSTER")
 $(dirname $0)/connect "$CLUSTER"
 
-pack_result=($(pack "${@:2}"))
+pack_result=("$("$(dirname $0)"/pack "${_arg_leftovers[@]}")")
 if [ $? -eq 0 ]; then
     echo "pack tarball success"
 else
@@ -18,7 +18,7 @@ workdir=${pack_result[1]}
 echo "tarball stored at $tarball"
 
 echo "Uploading $tarball to server"
-scp -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -P$SLURM_PORT /tmp/$tarball $USER@localhost:/home/$USER/project/run/tar/
+scp -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -P$SLURM_PORT /tmp/$tarball $USER@localhost:~/project/run/tar/
 if [ $? -eq 0 ]; then
     echo "Upload success"
 else
@@ -26,4 +26,4 @@ else
     exit 1
 fi
 
-ssh_nocheck -p$SLURM_PORT $USER@localhost "tar xf /home/$USER/project/run/tar/$tarball -C /home/$USER/project/run/untar && cd /home/$USER/project/run/untar/$workdir && sbatch ./sbatch_script.sh"
+ssh_nocheck -p$SLURM_PORT $USER@localhost "tar xf ~/project/run/tar/$tarball -C ~/project/run/untar && cd ~/project/run/untar/$workdir && sbatch ./sbatch_script.sh"

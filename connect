@@ -3,10 +3,10 @@
 source $(dirname $0)/argparse "$@" || exit 1
 source $(dirname $0)/utils.sh || exit 1
 
-INFO=$(find_all "$CLUSTER")
-LOCALPORT=$(awk '{ print $1 }' <<<"$INFO")
-HOSTNAME=$(awk '{ print $2 }' <<<"$INFO")
-REMOTEPORT=$(awk '{ print $3 }' <<<"$INFO")
+INFO=("$(find_all "$CLUSTER")")
+LOCALPORT=${INFO[0]}
+HOSTNAME=${INFO[1]}
+REMOTEPORT=${INFO[2]}
 
 if [ -z "$(pgrep -f "\-L $LOCALPORT:localhost:$REMOTEPORT")" ]
 then
