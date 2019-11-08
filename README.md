@@ -11,6 +11,12 @@ Make sure you have the following directories on the cluster
 
 Make sure you have the python virtualenv set up at `~/tf2` on the cluster
 
+## Install
+
+```bash
+pip install git+https://github.com/mavenlin/slurm_tools.git@master#egg=slurm_tools
+```
+
 ## Commands
 
 To submit a job from local
