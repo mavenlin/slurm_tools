@@ -8,6 +8,7 @@ import uuid
 import tarfile
 import argparse
 import sys
+import os
 
 
 def parse_sbatch_args(args):
@@ -64,15 +65,19 @@ def pack(job_name, command, sbatch_args):
     repo.index.commit(f"[dirty] commit {timestamp}")
     tar_name = f"{job_name}-{timestamp}"
     prefix = f"{job_name}/{timestamp}"
-    with open(f"/tmp/{tar_name}.tar", "wb") as f:
-      repo.archive(f, format="tar", prefix=f"{prefix}/")
+    os.system(f"git-archive-all --prefix {prefix}/ "
+              f"--force-submodules /tmp/{tar_name}.tar")
+    # with open(f"/tmp/{tar_name}.tar", "wb") as f:
+    #   repo.archive(f, format="tar", prefix=f"{prefix}/")
     repo.head.reset("HEAD~1")
   else:
     sha = git_cmd.rev_parse("HEAD", short=True)
     tar_name = f"{job_name}-{timestamp}"
     prefix = f"{job_name}/{timestamp}"
-    with open(f"/tmp/{tar_name}.tar", "wb") as f:
-      repo.archive(f, format="tar", prefix=f"{prefix}/")
+    os.system(f"git-archive-all --prefix {prefix}/ "
+              f"--force-submodules /tmp/{tar_name}.tar")
+    # with open(f"/tmp/{tar_name}.tar", "wb") as f:
+    #   repo.archive(f, format="tar", prefix=f"{prefix}/")
 
   archive = tarfile.open(f"/tmp/{tar_name}.tar", "a")
   sbatch_script_name = f"/tmp/{uuid.uuid4().hex}"

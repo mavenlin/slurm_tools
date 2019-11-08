@@ -13,6 +13,7 @@ setup(
     install_requires=[
         'uuid',
         'gitpython',
+        'git-archive-all',
     ],
     scripts=[
         'scripts/setup_cc',
