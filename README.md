@@ -1,6 +1,6 @@
 # Slurm Tools
 
-# Prerequisites
+## Prerequisites
 
 As for now these are hard coded.
 
@@ -11,7 +11,7 @@ Make sure you have the following directories on the cluster
 
 Make sure you have the python virtualenv set up at `~/tf2` on the cluster
 
-# Commands
+## Commands
 
 To submit a job from local
 ```bash
