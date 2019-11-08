@@ -17,6 +17,7 @@ To submit a job from local
 ```bash
 slurm submit "cluster_name" --job-name "job_name" --mem 16G --other-slurm-options program_to_run --program-options
 ```
+What happens behind the scene is the `slurm_pack` script will pack the current repo under which you run the command into a tarball. Convert the options into a sbatch script and pack together into the tarball, unpack remotely and submit a job.
 
 To grep the jobs
 ```bash
