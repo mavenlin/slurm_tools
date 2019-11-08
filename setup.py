@@ -15,6 +15,8 @@ setup(
         'gitpython',
     ],
     scripts=[
+        'scripts/setup_cc',
+        'scripts/remote_run',
         'scripts/argparse',
         'scripts/tb',
         'scripts/clear_tb',
