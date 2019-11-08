@@ -30,7 +30,7 @@ function kill_sleep {
 trap "kill_sleep; exit 1" INT
 
 DIR=$dir
-RUNNING_NODE=$(ssh_nocheck -p$SLURM_PORT $USER@localhost "squeue -u $USER --Format=NODELIST,STATE" | grep RUNNING | cut -d " " -f1)
+RUNNING_NODE=$(ssh_nocheck -p$SLURM_PORT $USER@localhost "squeue -u $USER --Format=NODELIST,STATE" | grep RUNNING | cut -d " " -f1 | head -1)
 if [ -z "$RUNNING_NODE" ]
 then
     echo "Allocating Resource"
