@@ -129,11 +129,11 @@ then
 fi
 CLUSTER=$_arg_cluster
 
-source $(dirname $0)/utils.sh
+source $(dirname $0)/slurm_utils.sh
 SLURM_PORT="$(find_port "$CLUSTER")"
 if [ -z "$SLURM_PORT" ]
 then
-    echo "[Error] cluster name $CLUSTER not found in config" >> /dev/stderr
+    echo "[Error] cluster name $CLUSTER not found in slurm_config" >> /dev/stderr
     exit 1
 fi
 

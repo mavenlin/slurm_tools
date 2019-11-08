@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 source $(dirname "$0")/argparse "$@" || exit 1
-source $(dirname "$0")/utils.sh || exit 1
+source $(dirname "$0")/slurm_utils.sh || exit 1
 SLURM_PORT=$(find_port "$CLUSTER")
-$(dirname $0)/connect "$CLUSTER"
+$(dirname $0)/slurm_connect "$CLUSTER"
 
 if [ -t 1 ] # if executed without pipe
 then
