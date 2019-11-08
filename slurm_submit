@@ -6,7 +6,8 @@ source $(dirname "$0")/utils.sh || exit 1
 SLURM_PORT=$(find_port "$CLUSTER")
 $(dirname $0)/connect "$CLUSTER"
 
-pack_result=("$("$(dirname $0)"/pack "${_arg_leftovers[@]}")")
+pack_result="$("$(dirname $0)"/pack "${_arg_leftovers[@]}")"
+pack_result=($pack_result)
 if [ $? -eq 0 ]; then
     echo "pack tarball success"
 else
