@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ "${BASH_SOURCE[0]}" -ef "$0" ]
+then
+    echo "source slurm_tools instead of running it"
+    exit 1
+fi
+
+source "$(dirname $0)"/slurm_utils.sh
+IFS=$'\n' lines=($(cat "$(dirname $0)"/slurm_config))
+for line in $lines
+do
+    cmd=$(echo $line | awk '{ print $1 }')
+    alias $cmd="slurm $cmd"
+done

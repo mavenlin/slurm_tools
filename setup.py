@@ -25,8 +25,10 @@ setup(
         'scripts/slurm_connect',
         'scripts/slurm_pack',
         'scripts/slurm',
+        'scripts/slurm_cat',
         'scripts/slurm_grep',
         'scripts/slurm_submit',
+        'scripts/slurm_tools',
         'scripts/slurm_utils.sh',
     ],
 )
