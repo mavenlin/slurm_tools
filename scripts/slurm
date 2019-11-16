@@ -112,10 +112,15 @@ assign_positional_args 1 "${_positionals[@]}"
 # [ <-- needed because of Argbash
 
 CLUSTER=$_arg_cluster
+source $(dirname "$0")/slurm_utils.sh
+SLURM_PORT=$(find_port "$CLUSTER")
 
 if [ $_arg_command = "submit" ]
 then
     $(dirname $0)/slurm_submit $CLUSTER ${_arg_leftovers[@]}
+elif [ $_arg_command = "connect" ]
+then
+    ssh -p $SLURM_PORT localhost
 elif [ $_arg_command = "grep" ]
 then
     $(dirname $0)/slurm_grep $CLUSTER ${_arg_leftovers[@]}
