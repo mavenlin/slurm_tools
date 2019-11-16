@@ -1,13 +1,14 @@
 #!/bin/bash
 
-if [ "${BASH_SOURCE[0]}" -ef "$0" ]
+if [ "${BASH_SOURCE[0]:-${(%):-%x}}" -ef "$0" ]
 then
     echo "source slurm_tools instead of running it"
     exit 1
 fi
 
-source "$(dirname $0)"/slurm_utils.sh
-IFS=$'\n' lines=($(cat "$(dirname $0)"/slurm_config))
+DIR=$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")
+source "$DIR"/slurm_utils.sh
+IFS=$'\n' lines=($(cat "$DIR"/slurm_config))
 for line in $lines
 do
     cmd=$(echo $line | awk '{ print $1 }')
