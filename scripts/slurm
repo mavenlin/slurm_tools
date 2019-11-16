@@ -120,6 +120,7 @@ then
     $(dirname $0)/slurm_submit $CLUSTER ${_arg_leftovers[@]}
 elif [ $_arg_command = "connect" ]
 then
+    $(dirname $0)/slurm_connect $CLUSTER
     ssh -p $SLURM_PORT localhost
 elif [ $_arg_command = "grep" ]
 then
