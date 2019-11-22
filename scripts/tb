@@ -56,7 +56,8 @@ ssh_nocheck -t -t -J $USER@localhost:$SLURM_PORT -L $PORT:localhost:$PORT $USER@
 tb_pid=$!
 
 echo "http://localhost:$PORT"
-if [[ -x $(which open) ]]
+OS="`uname`"
+if [[ "$OS" == "Darwin" ]]
 then
     open "http://localhost:$PORT"
 else
