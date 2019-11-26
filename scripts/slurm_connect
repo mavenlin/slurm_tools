@@ -20,5 +20,9 @@ then
     done
     echo "connection established" >> /dev/stderr
 else
+    while [ -z "$(lsof -i -P -n | grep "$LOCALPORT")" ]
+    do
+	sleep 1
+    done
     echo "$CLUSTER through localhost:$LOCALPORT" >> /dev/stderr
 fi
