@@ -5,9 +5,13 @@ function ssh_nocheck {
 }
 
 function find_port {
-    awk -v LOOKUPVAL=$1 '$1 == LOOKUPVAL { print $2 }' < $(dirname "$0")/slurm_config
+    awk -v LOOKUPVAL=$1 '$1 == LOOKUPVAL { print $2 }' < ~/.slurm_config
+}
+
+function find_user {
+    awk -v LOOKUPVAL=$1 '$1 == LOOKUPVAL { print $5 }' < ~/.slurm_config
 }
 
 function find_all {
-    awk -v LOOKUPVAL=$1 '$1 == LOOKUPVAL { print $2 " " $3 " " $4 }' < $(dirname "$0")/slurm_config
+    awk -v LOOKUPVAL=$1 '$1 == LOOKUPVAL { print $2 " " $3 " " $4 " " $5 }' < ~/.slurm_config
 }

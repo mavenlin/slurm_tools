@@ -126,6 +126,8 @@ assign_positional_args 1 "${_positionals[@]}"
 if [ ! -z "$_arg_user" ]
 then
     USER=$_arg_user
+else
+    USER="$(find_user "$CLUSTER")"
 fi
 CLUSTER=$_arg_cluster
 

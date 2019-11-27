@@ -8,6 +8,7 @@ INFO=($INFO)
 LOCALPORT=${INFO[0]}
 HOSTNAME=${INFO[1]}
 REMOTEPORT=${INFO[2]}
+USERNAME=${INFO[3]}
 
 if [ -z "$(pgrep -f "\-L $LOCALPORT:localhost:$REMOTEPORT")" ]
 then
