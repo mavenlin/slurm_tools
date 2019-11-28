@@ -133,7 +133,7 @@ else
 fi
 SLURM_PORT="$(find_port "$CLUSTER")"
 
-echo "#### [ $USER@$CLUSTER:$SLURM_PORT ] ####"
+echo "#### $USER@$CLUSTER [localhost:$SLURM_PORT] ####"
 
 if [ -z "$SLURM_PORT" ]
 then
