@@ -20,6 +20,7 @@ fi
 jobids=$(join_by , "${jobids[@]}")
 folder=$(date '+%Y%m%d_%H%M%S')
 dir="~/project/run/tensorboard/$folder"
+echo "Opening tensorboard for $jobids" >> /dev/stderr
 ssh_nocheck -p$SLURM_PORT $USER@localhost "mkdir -p $dir && sacct -j $jobids --format=Jobid,Jobname%-50,Workdir%-200 --allocations -n | tr -s \" \" | xargs -n 1 | parallel -N 3 ln -sf {3} $dir/{1}_{2}"
 
 TMPJOBNAME="$(date +"%Y%m%d%H%M%S")"
@@ -33,11 +34,11 @@ DIR=$dir
 RUNNING_NODE=$(ssh_nocheck -p$SLURM_PORT $USER@localhost "squeue -u $USER --Format=NODELIST,STATE" | grep RUNNING | cut -d " " -f1 | head -1)
 if [ -z "$RUNNING_NODE" ]
 then
-    echo "Allocating Resource"
+    echo "Allocating Resource" >> /dev/stderr
     ssh_nocheck -n -t -t -p$SLURM_PORT $USER@localhost "salloc --account=def-bengioy -c 4 --mem 16G sleep 1h" &
     salloc_pid=$!
 else
-    echo "Reusing Resource"
+    echo "Reusing Resource" >> /dev/stderr
 fi
 
 while [ -z "$RUNNING_NODE" ]
@@ -51,11 +52,11 @@ function kill_tensorboard {
 trap "kill_sleep; kill_tensorboard; exit 1" INT
 
 PORT=$(ssh_nocheck -J $USER@localhost:$SLURM_PORT $USER@$RUNNING_NODE "python -c 'import socket; s=socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.bind((\"localhost\",0)); print(s.getsockname()[1])'")
-echo "Opening tensorboard on $USER@$RUNNING_NODE:$PORT"
+echo "Opening tensorboard on $USER@$RUNNING_NODE:$PORT" >> /dev/stderr
 ssh_nocheck -t -t -J $USER@localhost:$SLURM_PORT -L $PORT:localhost:$PORT $USER@$RUNNING_NODE "source ~/tf2/bin/activate && tensorboard --logdir $DIR --bind_all --port $PORT" &
 tb_pid=$!
 
-echo "http://localhost:$PORT"
+echo "http://localhost:$PORT" >> /dev/stderr
 OS="`uname`"
 if [[ "$OS" == "Darwin" ]]
 then
