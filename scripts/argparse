@@ -133,6 +133,8 @@ else
 fi
 SLURM_PORT="$(find_port "$CLUSTER")"
 
+echo "#### [ $USER@$CLUSTER:$SLURM_PORT ] ####"
+
 if [ -z "$SLURM_PORT" ]
 then
     echo "[Error] cluster name $CLUSTER not found in slurm_config" >> /dev/stderr

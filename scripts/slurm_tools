@@ -8,7 +8,7 @@ fi
 
 DIR=$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")
 source "$DIR"/slurm_utils.sh
-IFS=$'\n' lines=($(cat "$DIR"/slurm_config))
+IFS=$'\n' lines=($(cat ~/.slurm_config))
 for line in $lines
 do
     cmd=$(echo $line | awk '{ print $1 }')
