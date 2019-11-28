@@ -121,6 +121,7 @@ then
 elif [ $_arg_command = "connect" ]
 then
     $(dirname $0)/slurm_connect $CLUSTER
+    USER=$(find_user "$CLUSTER")
     ssh -p $SLURM_PORT $USER@localhost
 elif [ $_arg_command = "grep" ]
 then
