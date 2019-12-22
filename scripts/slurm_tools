@@ -6,8 +6,7 @@ then
     exit 1
 fi
 
-DIR=$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")
-source "$DIR"/slurm_utils.sh
+source "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")"/slurm_utils.sh
 IFS=$'\n' lines=($(cat ~/.slurm_config))
 for line in $lines
 do
