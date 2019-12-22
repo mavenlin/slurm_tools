@@ -13,5 +13,5 @@ function find_user {
 }
 
 function find_all {
-    awk -v LOOKUPVAL=$1 '$1 == LOOKUPVAL { print $2 " " $3 " " $4 " " $5 }' < ~/.slurm_config
+    awk -v LOOKUPVAL=$1 '$1 == LOOKUPVAL { print $2 " " $3 " " $4 " " $5 " " $6 }' < ~/.slurm_config
 }

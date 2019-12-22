@@ -10,6 +10,7 @@ import argparse
 import sys
 import os
 
+virtualenv = os.getenv('VIRTUALENV')
 
 def parse_sbatch_args(args):
   sbatch_args = {}
@@ -90,7 +91,10 @@ def pack(job_name, command, sbatch_args):
     "--job-name": f"{job_name}",
   }
   options.update(sbatch_args)
-  commands = ["source ~/tf2/bin/activate", " ".join(command)]
+  if virtualenv != "":
+    commands = [f"source {virtualenv}/bin/activate", " ".join(command)]
+  else:
+    commands = [" ".join(command)]
   sbatch_script(options, commands, sbatch_script_name, verbose=True)
   archive.add(sbatch_script_name, arcname=f"{prefix}/{exec_path}/sbatch_script.sh")
   archive.close()
