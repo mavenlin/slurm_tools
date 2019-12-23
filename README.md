@@ -20,12 +20,13 @@ pip install git+https://github.com/mavenlin/slurm_tools.git@master#egg=slurm_too
 ## Config
 
 Copy `slurm_config` file to your local `~/.slurm_config`, modify it accordingly with your username and add your clusters.
-The five columns means `name`, `local_port`, `hostname`, `remote_port`, `username` respectively. `remote_port` is the sshd port (usually 22) for the access node of the cluster.
+The six columns means `name`, `local_port`, `hostname`, `remote_port`, `username`, `virtualenv_directory` respectively. `remote_port` is the sshd port (usually 22) for the access node of the cluster.
 The scripts will open a connection in the background using
 ```bash
 ssh -p remote_port -L local_port:localhost:remote_port username@hostname
 ```
-Once the connection is established, the rest of the scripts will connect through `localhost:local_port`
+Once the connection is established, the rest of the scripts will connect through `localhost:local_port`. The `virtualenv_directory` is used when a job is submitted.
+
 
 ## Commands
 
@@ -40,7 +41,13 @@ To submit a job from local (replace beluga with the cluster name listed in `~/.s
 ```bash
 beluga submit --job-name "job_name" --mem 16G --other-slurm-options program_to_run --program-options
 ```
-What happens behind the scene is the `slurm_pack` script will pack the current repo under which you run the command into a tarball. Convert the options into a sbatch script and pack together into the tarball, unpack remotely and submit a job.
+What happens behind the scene is the `slurm_pack` script will pack the current repo under which you run the command into a tarball. Convert the options into a sbatch script and pack together into the tarball, unpack remotely and submit a job. Before executing the main program, a `source virtualenv_directory/bin/activate` is executed to activate the python virutalenv. If you have more than one virtualenv on one cluster, you can write different lines in the config file for them.
+
+Example:
+```
+beluga_tf 9999 beluga.calculcanada.ca 22 username ~/tf2
+beluga_torch 9999 beluga.calculcanada.ca 22 username ~/torch
+```
 
 To grep the jobs
 ```bash
