@@ -123,6 +123,12 @@ then
     $(dirname $0)/slurm_connect $CLUSTER
     USER=$(find_user "$CLUSTER")
     ssh -p $SLURM_PORT $USER@localhost
+elif [ $_arg_command = "cat" ]
+then
+    $(dirname $0)/slurm_cat $CLUSTER ${_arg_leftovers[@]}
+elif [ $_arg_command = "submit_track" ]
+then
+    SLURMTRACK=1 $(dirname $0)/slurm_submit $CLUSTER ${_arg_leftovers[@]}
 elif [ $_arg_command = "grep" ]
 then
     $(dirname $0)/slurm_grep $CLUSTER ${_arg_leftovers[@]}

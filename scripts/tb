@@ -14,7 +14,7 @@ do
 done
 if [ ${#jobids[@]} -eq 0 ]
 then
-    echo "[Error] there's no job id piped to runtb"
+    echo "[Error] there's no job id piped to tb"
     exit 1
 fi
 jobids=$(join_by , "${jobids[@]}")

@@ -16,22 +16,26 @@ $(dirname $0)/slurm_connect "$CLUSTER"
 pack_result="$(VIRTUALENV=$VIRTUALENV "$(dirname $0)"/slurm_pack "${_arg_leftovers[@]}")"
 pack_result=($pack_result)
 if [ $? -eq 0 ]; then
-    echo "pack tarball success"
+    echo "pack tarball success" >> /dev/stderr
 else
-    echo "pack tarball failed"
+    echo "pack tarball failed" >> /dev/stderr
     exit 1
 fi
 tarball=${pack_result[0]}
 workdir=${pack_result[1]}
-echo "tarball stored at $tarball"
+echo "tarball stored at $tarball" >> /dev/stderr
 
-echo "Uploading $tarball to server"
+echo "Uploading $tarball to server" >> /dev/stderr
 scp -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -P$LOCALPORT /tmp/$tarball $USER@localhost:~/project/run/tar/
 if [ $? -eq 0 ]; then
-    echo "Upload success"
+    echo "Upload success" >> /dev/stderr
 else
-    echo "Upload failed"
+    echo "Upload failed" >> /dev/stderr
     exit 1
 fi
 
-ssh_nocheck -p$SLURM_PORT $USER@localhost "tar xf ~/project/run/tar/$tarball -C ~/project/run/untar && cd ~/project/run/untar/$workdir && sbatch ./sbatch_script.sh"
+if [ -z "$SLURMTRACK" ]; then
+    ssh_nocheck -p$SLURM_PORT $USER@localhost "tar xf ~/project/run/tar/$tarball -C ~/project/run/untar && cd ~/project/run/untar/$workdir && sbatch ./sbatch_script.sh"
+else
+    ssh_nocheck -p$SLURM_PORT $USER@localhost "tar xf ~/project/run/tar/$tarball -C ~/project/run/untar && cd ~/project/run/untar/$workdir && sbatch ./sbatch_script.sh && tail -F ~/project/run/untar/$workdir/slurm.err"
+fi
