@@ -21,7 +21,7 @@ jobids=$(join_by , "${jobids[@]}")
 folder=$(date '+%Y%m%d_%H%M%S')
 dir="~/project/run/tensorboard/$folder"
 echo "Opening tensorboard for $jobids" >> /dev/stderr
-ssh_nocheck -p$SLURM_PORT $USER@localhost "mkdir -p $dir && sacct -j $jobids --format=Jobid,Jobname%-50,Workdir%-200 --allocations -n | tr -s \" \" | xargs -n 1 | parallel -N 3 ln -sf {3} $dir/{1}_{2}"
+ssh_nocheck -p$SLURM_PORT $USER@localhost "mkdir -p $dir && echo $jobids | tr , '\n' | xargs -I{} sh -c \"ln -s ~/project/jobs/{} $dir/{}\""
 
 TMPJOBNAME="$(date +"%Y%m%d%H%M%S")"
 # Launch tensorboard on the symlinked folder

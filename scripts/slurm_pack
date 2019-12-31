@@ -48,6 +48,8 @@ def sbatch_script(options, commands, sbatch_script_name, verbose=True):
     f.write("#!/bin/bash\n")
     for k, v in options.items():
       f.write(f"#SBATCH {k} {v}\n")
+    f.write("mkdir ~/project/jobs/$SLURM_JOB_ID\n")
+    f.write("ln -s $(pwd) ~/project/jobs/$SLURM_JOB_ID/$SLURM_JOB_NAME\n")
     for command in commands:
       f.write(f"{command}\n")
   with open(sbatch_script_name, "r") as f:
