@@ -37,5 +37,5 @@ fi
 if [ -z "$SLURMTRACK" ]; then
     ssh_nocheck -p$SLURM_PORT $USER@localhost "tar xf ~/project/run/tar/$tarball -C ~/project/run/untar && cd ~/project/run/untar/$workdir && sbatch ./sbatch_script.sh"
 else
-    ssh_nocheck -p$SLURM_PORT $USER@localhost "tar xf ~/project/run/tar/$tarball -C ~/project/run/untar && cd ~/project/run/untar/$workdir && sbatch ./sbatch_script.sh && tail -F ~/project/run/untar/$workdir/slurm.err"
+    ssh_nocheck -p$SLURM_PORT $USER@localhost "tar xf ~/project/run/tar/$tarball -C ~/project/run/untar && cd ~/project/run/untar/$workdir && sbatch ./sbatch_script.sh && tail -F ~/project/run/untar/$workdir/slurm.*"
 fi
