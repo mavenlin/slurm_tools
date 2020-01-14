@@ -144,6 +144,9 @@ then
 elif [ $_arg_command = "clear_tb" ]
 then
     $(dirname $0)/clear_tb $CLUSTER
+elif [ $_arg_command = "clear" ]
+then
+    $(dirname $0)/slurm_clear $CLUSTER
 else
     echo "$_arg_command is not a valid command"
     exit 1

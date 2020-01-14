@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+source $(dirname $0)/argparse "$@" || exit 1
+source $(dirname $0)/slurm_utils.sh || exit 1
+SLURM_PORT=$(find_port "$CLUSTER")
+$(dirname $0)/slurm_connect "$CLUSTER"
+$(dirname $0)/remote_run $CLUSTER <<'EOF'
+echo "Removing the following"
+sacct -X -u $USER -o JobID,State,Workdir%-200 | grep FAILED
+rm -r `sacct -X -u $USER -o JobID,State,Workdir%-200 | grep FAILED | awk '{ print $3 }'`
+EOF

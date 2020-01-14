@@ -26,6 +26,7 @@ setup(
         'scripts/slurm_pack',
         'scripts/slurm',
         'scripts/slurm_cat',
+        'scripts/slurm_clear',
         'scripts/slurm_grep',
         'scripts/slurm_submit',
         'scripts/slurm_tools',
