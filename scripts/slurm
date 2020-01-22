@@ -140,6 +140,9 @@ then
     $(dirname $0)/slurm_cat $CLUSTER slurm.out
 elif [ $_arg_command = "tb" ]
 then
+    REUSE=1 $(dirname $0)/tb $CLUSTER
+elif [ $_arg_command = "tb_persist" ]
+then
     $(dirname $0)/tb $CLUSTER
 elif [ $_arg_command = "clear_tb" ]
 then

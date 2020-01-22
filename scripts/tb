@@ -32,7 +32,7 @@ trap "kill_sleep; exit 1" INT
 
 DIR=$dir
 RUNNING_NODE=$(ssh_nocheck -p$SLURM_PORT $USER@localhost "squeue -u $USER --Format=NODELIST,STATE" | grep RUNNING | cut -d " " -f1 | head -1)
-if [ -z "$RUNNING_NODE" ]
+if [ -z "$RUNNING_NODE" ] || [ -z "$REUSE" ]
 then
     echo "Allocating Resource" >> /dev/stderr
     ssh_nocheck -n -t -t -p$SLURM_PORT $USER@localhost "salloc --account=def-bengioy -c 4 --mem 16G sleep 1h" &
