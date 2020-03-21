@@ -3,7 +3,6 @@
 source $(dirname $0)/argparse "$@" || exit 1
 source $(dirname $0)/slurm_utils.sh || exit 1
 SLURM_PORT=$(find_port "$CLUSTER")
-$(dirname $0)/slurm_connect "$CLUSTER"
 
 # Collect logs from the job ids that are passed in from the stdin
 function join_by { local IFS="$1"; shift; echo "$*"; }
@@ -21,6 +20,7 @@ jobids=$(join_by , "${jobids[@]}")
 folder=$(date '+%Y%m%d_%H%M%S')
 dir="~/project/run/tensorboard/$folder"
 echo "Opening tensorboard for $jobids" >> /dev/stderr
+$(dirname $0)/slurm_connect "$CLUSTER"
 ssh_nocheck -p$SLURM_PORT $USER@localhost "mkdir -p $dir && echo $jobids | tr , '\n' | xargs -I{} sh -c \"ln -s ~/project/jobs/{} $dir/{}\""
 
 TMPJOBNAME="$(date +"%Y%m%d%H%M%S")"
