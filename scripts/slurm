@@ -138,6 +138,9 @@ then
 elif [ $_arg_command = "output" ]
 then
     $(dirname $0)/slurm_cat $CLUSTER slurm.out
+elif [ $_arg_command = "resume" ]
+then
+    $(dirname $0)/slurm_resume $CLUSTER ${_arg_leftovers[@]}
 elif [ $_arg_command = "tb" ]
 then
     REUSE=1 $(dirname $0)/tb $CLUSTER

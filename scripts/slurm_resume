@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+source $(dirname $0)/argparse "$@" || exit 1
+source $(dirname "$0")/slurm_utils.sh || exit 1
+
+INFO="$(find_all "$CLUSTER")"
+INFO=($INFO)
+LOCALPORT=${INFO[0]}
+HOSTNAME=${INFO[1]}
+REMOTEPORT=${INFO[2]}
+USERNAME=${INFO[3]}
+VIRTUALENV=${INFO[4]}
+
+$(dirname $0)/slurm_connect "$CLUSTER"
+if [ -z "$SBATCH_CMD" ]; then
+    SBATCH_CMD=sbatch
+fi
+
+ssh_nocheck -p$SLURM_PORT $USER@localhost 'jobdir=$(dirname "$(find -L ~/project/jobs/'"${_arg_leftovers[@]}"'/ -name sbatch_script.sh)") && cd $jobdir && restore=$(dirname "$(find -L ./ -name checkpoints | sort | tail -1)") && timestamp=$(date +%Y%m%d-%H%M%S) && cat sbatch_script.sh | sed "s@\(^python.*$\)@\1 --restore $restore@g" > sbatch_script_${timestamp}.sh && cat ./sbatch_script_${timestamp}.sh && '"$SBATCH_CMD"' sbatch_script_${timestamp}.sh'

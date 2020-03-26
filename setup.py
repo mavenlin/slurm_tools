@@ -28,6 +28,7 @@ setup(
         'scripts/slurm_cat',
         'scripts/slurm_clear',
         'scripts/slurm_grep',
+        'scripts/slurm_resume',
         'scripts/slurm_submit',
         'scripts/slurm_tools',
         'scripts/slurm_utils.sh',
