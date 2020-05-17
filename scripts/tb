@@ -38,6 +38,8 @@ then
     ssh_nocheck -n -t -t -p$SLURM_PORT $USER@localhost "salloc --account=def-bengioy -c 4 --mem 16G sleep 1h" &
     salloc_pid=$!
 else
+    echo "Current Running Nodes" >> /dev/stderr
+    echo "$RUNNING_NODE" >> /dev/stderr
     echo "Reusing Resource" >> /dev/stderr
 fi
 
