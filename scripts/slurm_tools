@@ -13,3 +13,4 @@ do
     cmd=$(echo $line | awk '{ print $1 }')
     alias $cmd="slurm $cmd"
 done
+unset IFS
